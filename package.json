@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "cosette-app",
   "type": "module",
   "private": true,
   "scripts": {
@@ -10,8 +10,17 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxt/ui": "^2.18.4",
+    "@pinia/nuxt": "^0.5.4",
+    "@nuxtjs/google-fonts": "^3.2.0",
+    "@nuxtjs/supabase": "^1.4.0",
+    "@supabase/supabase-js": "^2.45.4",
     "nuxt": "^4.0.3",
+    "pinia": "^2.2.4",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4"
   }
 }

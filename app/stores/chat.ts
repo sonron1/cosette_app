@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+import type { RealtimeChannel } from '@supabase/supabase-js'
+import {useAuthStore} from "~/stores/auth";
 
 interface Message {
     id: string
@@ -20,21 +22,22 @@ interface Message {
 export const useChatStore = defineStore('chat', () => {
     const messages = ref<Message[]>([])
     const activeChat = ref<string | null>(null)
+    const activeSubscription = ref<RealtimeChannel | null>(null)
     const supabase = useSupabaseClient()
 
     const sendMessage = async (receiverId: string, content: string, file?: File) => {
         try {
             const authStore = useAuthStore()
 
-            let fileUrl = null
-            let fileName = null
-            let fileType = null
+            let fileUrl: string | null = null
+            let fileName: string | null = null
+            let fileType: string | null = null
 
             if (file) {
                 const fileExt = file.name.split('.').pop()
                 const filePath = `${Date.now()}.${fileExt}`
 
-                const { data: uploadData, error: uploadError } = await supabase.storage
+                const { error: uploadError } = await supabase.storage
                     .from('chat-files')
                     .upload(filePath, file)
 
@@ -64,8 +67,9 @@ export const useChatStore = defineStore('chat', () => {
 
             await fetchMessages(receiverId)
             return { success: true }
-        } catch (error: any) {
-            return { success: false, error: error.message }
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+            return { success: false, error: errorMessage }
         }
     }
 
@@ -73,27 +77,37 @@ export const useChatStore = defineStore('chat', () => {
         try {
             const authStore = useAuthStore()
 
+            if (!authStore.user?.id) {
+                console.error('Utilisateur non authentifié')
+                return
+            }
+
             const { data, error } = await supabase
                 .from('messages')
                 .select(`
           *,
           sender:sender_id(nom, prenom, pseudo, photo)
         `)
-                .or(`and(sender_id.eq.${authStore.user?.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${authStore.user?.id})`)
+                .or(`and(sender_id.eq.${authStore.user.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${authStore.user.id})`)
                 .order('created_at', { ascending: true })
 
             if (error) throw error
-            messages.value = data || []
+            messages.value = (data as Message[]) || []
             activeChat.value = friendId
         } catch (error) {
             console.error('Erreur lors du chargement des messages:', error)
         }
     }
 
-    const subscribeToMessages = (friendId: string) => {
+    const subscribeToMessages = (friendId: string): RealtimeChannel => {
         const authStore = useAuthStore()
 
-        return supabase
+        // Unsubscribe from previous channel if exists
+        if (activeSubscription.value) {
+            activeSubscription.value.unsubscribe()
+        }
+
+        const channel = supabase
             .channel(`messages-${friendId}`)
             .on('postgres_changes',
                 {
@@ -103,14 +117,24 @@ export const useChatStore = defineStore('chat', () => {
                 },
                 (payload) => {
                     const newMessage = payload.new as any
-                    // Vérifier si le message concerne la conversation actuelle
-                    if ((newMessage.sender_id === authStore.user?.id && newMessage.receiver_id === friendId) ||
-                        (newMessage.sender_id === friendId && newMessage.receiver_id === authStore.user?.id)) {
+                    if (authStore.user?.id &&
+                        ((newMessage.sender_id === authStore.user.id && newMessage.receiver_id === friendId) ||
+                            (newMessage.sender_id === friendId && newMessage.receiver_id === authStore.user.id))) {
                         fetchMessages(friendId)
                     }
                 }
             )
             .subscribe()
+
+        activeSubscription.value = channel
+        return channel
+    }
+
+    const unsubscribeFromMessages = () => {
+        if (activeSubscription.value) {
+            activeSubscription.value.unsubscribe()
+            activeSubscription.value = null
+        }
     }
 
     return {
@@ -118,6 +142,7 @@ export const useChatStore = defineStore('chat', () => {
         activeChat: readonly(activeChat),
         sendMessage,
         fetchMessages,
-        subscribeToMessages
+        subscribeToMessages,
+        unsubscribeFromMessages
     }
 })

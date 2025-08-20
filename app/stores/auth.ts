@@ -41,8 +41,9 @@ export const useAuthStore = defineStore('auth', () => {
             }
 
             return { success: true }
-        } catch (error: any) {
-            return { success: false, error: error.message }
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+            return { success: false, error: errorMessage }
         }
     }
 
@@ -56,7 +57,6 @@ export const useAuthStore = defineStore('auth', () => {
         photo?: string
     }) => {
         try {
-            // Vérifier si le pseudo existe déjà
             const { data: existingUser } = await supabase
                 .from('users')
                 .select('pseudo')
@@ -92,8 +92,9 @@ export const useAuthStore = defineStore('auth', () => {
             }
 
             return { success: true }
-        } catch (error: any) {
-            return { success: false, error: error.message }
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+            return { success: false, error: errorMessage }
         }
     }
 
@@ -113,7 +114,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     const logout = async () => {
-        await supabase.auth.signOut()
+        const { error } = await supabase.auth.signOut()
+        if (error) {
+            console.error('Erreur lors de la déconnexion:', error)
+        }
         user.value = null
         friends.value = []
         friendRequests.value = []
@@ -142,8 +146,9 @@ export const useAuthStore = defineStore('auth', () => {
 
             if (error) throw error
             return { success: true }
-        } catch (error: any) {
-            return { success: false, error: error.message }
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+            return { success: false, error: errorMessage }
         }
     }
 
@@ -189,7 +194,7 @@ export const useAuthStore = defineStore('auth', () => {
                 .eq('status', 'pending')
 
             if (error) throw error
-            friendRequests.value = data || []
+            friendRequests.value = (data as FriendRequest[]) || []
         } catch (error) {
             console.error('Erreur lors du chargement des demandes d\'amis:', error)
         }
@@ -214,7 +219,7 @@ export const useAuthStore = defineStore('auth', () => {
                     : request.sender
             }) || []
 
-            friends.value = friendsList
+            friends.value = friendsList as User[]
         } catch (error) {
             console.error('Erreur lors du chargement des amis:', error)
         }
