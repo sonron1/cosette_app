@@ -1,4 +1,8 @@
 import { defineStore } from 'pinia'
+import type { RealtimeChannel, RealtimePostgresInsertPayload } from '@supabase/supabase-js'
+import { useAuthStore } from '~/stores/auth'
+import { ref, readonly } from 'vue'
+import { useSupabaseClient } from '#imports'
 
 interface Message {
     id: string
@@ -20,97 +24,142 @@ interface Message {
 export const useChatStore = defineStore('chat', () => {
     const messages = ref<Message[]>([])
     const activeChat = ref<string | null>(null)
-    const supabase = useSupabaseClient()
+    const activeSubscription = ref<RealtimeChannel | null>(null)
+    // Relaxer le typage du client pour éviter les "never" sur insert/update
+    const supabase = useSupabaseClient<any>()
 
-    const sendMessage = async (receiverId: string, content: string, file?: File) => {
+    const sendMessage = async (
+        receiverId: string,
+        content: string,
+        file?: File
+    ): Promise<{ success: boolean; error?: string }> => {
         try {
             const authStore = useAuthStore()
-
-            let fileUrl = null
-            let fileName = null
-            let fileType = null
-
-            if (file) {
-                const fileExt = file.name.split('.').pop()
-                const filePath = `${Date.now()}.${fileExt}`
-
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('chat-files')
-                    .upload(filePath, file)
-
-                if (uploadError) throw uploadError
-
-                const { data: { publicUrl } } = supabase.storage
-                    .from('chat-files')
-                    .getPublicUrl(filePath)
-
-                fileUrl = publicUrl
-                fileName = file.name
-                fileType = file.type
+            if (!authStore.user?.id) {
+                return { success: false, error: 'Utilisateur non authentifié' }
+            }
+            if (!receiverId) {
+                return { success: false, error: 'Destinataire invalide' }
+            }
+            if (!content && !file) {
+                return { success: false, error: 'Message vide' }
             }
 
-            const { error } = await supabase
-                .from('messages')
-                .insert({
-                    sender_id: authStore.user?.id,
-                    receiver_id: receiverId,
-                    content,
-                    file_url: fileUrl,
-                    file_name: fileName,
-                    file_type: fileType
-                })
+            let fileUrl: string | null = null
+            let fileName: string | null = null
+            let fileType: string | null = null
 
+            if (file) {
+                const rawExt = file.name.includes('.') ? file.name.split('.').pop() : ''
+                const fileExt = rawExt ? `.${rawExt}` : ''
+                const filePath = `chat/${authStore.user.id}/${Date.now()}${fileExt}`
+
+                const { error: uploadError } = await supabase.storage
+                    .from('chat-files')
+                    .upload(filePath, file, {
+                        contentType: file.type || undefined,
+                        upsert: false
+                    })
+                if (uploadError) throw uploadError
+
+                const { data } = supabase.storage.from('chat-files').getPublicUrl(filePath)
+                fileUrl = data.publicUrl
+                fileName = file.name
+                fileType = file.type || null
+            }
+
+            const { error } = await supabase.from('messages').insert({
+                sender_id: authStore.user.id,
+                receiver_id: receiverId,
+                content,
+                file_url: fileUrl,
+                file_name: fileName,
+                file_type: fileType
+            })
             if (error) throw error
 
             await fetchMessages(receiverId)
             return { success: true }
-        } catch (error: any) {
-            return { success: false, error: error.message }
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+            return { success: false, error: errorMessage }
         }
     }
 
-    const fetchMessages = async (friendId: string) => {
+    const fetchMessages = async (friendId: string): Promise<void> => {
         try {
             const authStore = useAuthStore()
+            if (!authStore.user?.id) {
+                console.error('Utilisateur non authentifié')
+                return
+            }
+            if (!friendId) return
 
             const { data, error } = await supabase
                 .from('messages')
-                .select(`
-          *,
-          sender:sender_id(nom, prenom, pseudo, photo)
-        `)
-                .or(`and(sender_id.eq.${authStore.user?.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${authStore.user?.id})`)
+                .select(
+                    `
+            *,
+            sender:sender_id(nom, prenom, pseudo, photo)
+          `
+                )
+                .or(
+                    `and(sender_id.eq.${authStore.user.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${authStore.user.id})`
+                )
                 .order('created_at', { ascending: true })
 
             if (error) throw error
-            messages.value = data || []
+            messages.value = (data as Message[]) || []
             activeChat.value = friendId
         } catch (error) {
             console.error('Erreur lors du chargement des messages:', error)
         }
     }
 
-    const subscribeToMessages = (friendId: string) => {
+    const subscribeToMessages = (friendId: string): RealtimeChannel => {
         const authStore = useAuthStore()
 
-        return supabase
+        if (activeSubscription.value) {
+            void activeSubscription.value.unsubscribe()
+        }
+
+        const filter =
+            authStore.user?.id && friendId
+                ? `or(and(sender_id.eq.${authStore.user.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${authStore.user.id}))`
+                : undefined
+
+        const channel = supabase
             .channel(`messages-${friendId}`)
-            .on('postgres_changes',
+            .on(
+                'postgres_changes',
                 {
                     event: 'INSERT',
                     schema: 'public',
-                    table: 'messages'
+                    table: 'messages',
+                    ...(filter ? { filter } : {})
                 },
-                (payload) => {
-                    const newMessage = payload.new as any
-                    // Vérifier si le message concerne la conversation actuelle
-                    if ((newMessage.sender_id === authStore.user?.id && newMessage.receiver_id === friendId) ||
-                        (newMessage.sender_id === friendId && newMessage.receiver_id === authStore.user?.id)) {
-                        fetchMessages(friendId)
+                (payload: RealtimePostgresInsertPayload<any>) => {
+                    const newMessage = payload.new as { sender_id: string; receiver_id: string }
+                    if (
+                        authStore.user?.id &&
+                        ((newMessage.sender_id === authStore.user.id && newMessage.receiver_id === friendId) ||
+                            (newMessage.sender_id === friendId && newMessage.receiver_id === authStore.user.id))
+                    ) {
+                        void fetchMessages(friendId)
                     }
                 }
             )
             .subscribe()
+
+        activeSubscription.value = channel
+        return channel
+    }
+
+    const unsubscribeFromMessages = async (): Promise<void> => {
+        if (activeSubscription.value) {
+            await activeSubscription.value.unsubscribe()
+            activeSubscription.value = null
+        }
     }
 
     return {
@@ -118,6 +167,7 @@ export const useChatStore = defineStore('chat', () => {
         activeChat: readonly(activeChat),
         sendMessage,
         fetchMessages,
-        subscribeToMessages
+        subscribeToMessages,
+        unsubscribeFromMessages
     }
 })
