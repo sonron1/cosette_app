@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-b from-white to-sky-50">
-    <div class="container mx-auto px-6 py-8">
-      <div class="grid lg:grid-cols-4 gap-8">
+    <div class="container mx-auto px-4 sm:px-6 py-8">
+      <div class="grid lg:grid-cols-4 gap-6 lg:gap-8">
         <!-- Sidebar -->
         <div class="lg:col-span-1 space-y-6">
           <div class="bg-white rounded-2xl shadow-sm ring-1 ring-sky-100 p-6">
@@ -100,7 +100,7 @@
         <!-- Main Content -->
         <div class="lg:col-span-3 space-y-8">
           <!-- CTA -->
-          <div class="rounded-2xl bg-white ring-1 ring-sky-100 shadow-sm p-6 flex items-center justify-between">
+          <div class="rounded-2xl bg-white ring-1 ring-sky-100 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 class="text-xl font-semibold text-sky-900">
                 Bienvenue, {{ authStore.user?.prenom }} !
@@ -118,7 +118,7 @@
           </div>
 
           <!-- Stats -->
-          <div class="grid md:grid-cols-3 gap-6">
+          <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div class="bg-white rounded-2xl shadow-sm ring-1 ring-sky-100 p-6 text-center">
               <div class="text-3xl font-bold text-sky-700 mb-2">{{ authStore.friends.length }}</div>
               <div class="text-sky-700/80 text-sm">Amis</div>
@@ -145,7 +145,7 @@
               <p>Aucun ami pour le moment. Envoyez des demandes pour commencer !</p>
             </div>
 
-            <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
               <div
                   v-for="friend in authStore.friends"
                   :key="friend.id"
@@ -184,9 +184,9 @@
           <!-- Chat Modal (aperçu) -->
           <div
               v-if="showChat"
-              class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50"
+              class="fixed inset-0 bg-black/40 flex items-center justify-center p-3 sm:p-4 z-50"
           >
-            <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col ring-1 ring-sky-100">
+            <div class="bg-white rounded-2xl w-full max-w-full sm:max-w-2xl max-h-[85vh] sm:max-h-[80vh] flex flex-col ring-1 ring-sky-100">
               <div class="p-4 border-b border-sky-100 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
                   <img
@@ -203,14 +203,12 @@
                 </div>
                 <button @click="closeChat" class="text-sky-700 hover:text-sky-900">
                   <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-                    />
+                    <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                   </svg>
                 </button>
               </div>
 
-              <div class="flex-1 overflow-y-auto p-4 chat-container">
+              <div class="flex-1 overflow-y-auto p-3 sm:p-4 chat-container">
                 <div v-for="message in chatStore.messages" :key="message.id" class="mb-4">
                   <div :class="message.sender_id === authStore.user?.id ? 'flex justify-end' : 'flex justify-start'">
                     <div :class="message.sender_id === authStore.user?.id ? 'message-bubble message-sent' : 'message-bubble message-received'">
@@ -222,7 +220,7 @@
                             class="inline-flex items-center space-x-2 text-xs underline"
                         >
                           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                           </svg>
                           <span>{{ message.file_name }}</span>
                         </a>
@@ -235,8 +233,8 @@
                 </div>
               </div>
 
-              <div class="p-4 border-t border-sky-100">
-                <form @submit.prevent="sendMessage" class="flex space-x-2">
+              <div class="p-3 sm:p-4 border-t border-sky-100">
+                <form @submit.prevent="sendMessage" class="flex gap-2">
                   <input
                       v-model="newMessage"
                       type="text"
@@ -351,15 +349,20 @@ const handleFileSelect = (event: Event) => {
 onMounted(async () => {
   await authStore.fetchFriendRequests()
   await authStore.fetchFriends()
-  // Optionnel: calculer/charger totalMessages
 })
 </script>
 
 <style scoped>
 .message-bubble {
-  max-width: 75%;
+  max-width: 85%;
   padding: 0.5rem 0.75rem;
   border-radius: 0.75rem;
+}
+@media (min-width: 640px) {
+  .message-bubble { max-width: 75%; }
+}
+@media (min-width: 1024px) {
+  .message-bubble { max-width: 70%; }
 }
 .message-sent {
   background: #0369a1;

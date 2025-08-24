@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-white to-sky-50 flex items-center justify-center px-6 py-12" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
+  <div class="min-h-screen bg-gradient-to-b from-white to-sky-50 flex items-center justify-center px-4 sm:px-6 py-10 sm:py-12" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
     <div class="w-full max-w-2xl">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-sky-900 mb-2">Inscription</h1>
@@ -7,7 +7,7 @@
       </div>
 
       <div class="rounded-2xl bg-white ring-1 ring-sky-100 shadow-md">
-        <form @submit.prevent="handleRegister" class="p-6 md:p-8 space-y-5" novalidate>
+        <form @submit.prevent="handleRegister" class="p-5 sm:p-6 md:p-8 space-y-5" novalidate>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label for="nom" class="block text-sm font-medium text-sky-900 mb-2">Nom</label>
@@ -171,10 +171,10 @@ const form = reactive<{
   prenom: string
   pseudo: string
   email: string
-  age: number | '' // '' tant que non rempli
+  age: number | ''
   password: string
   confirmPassword: string
-  photo: string | null // Base64 ou URL
+  photoFile: File | null
 }>({
   nom: '',
   prenom: '',
@@ -183,27 +183,17 @@ const form = reactive<{
   age: '',
   password: '',
   confirmPassword: '',
-  photo: null
+  photoFile: null
 })
 
 const handleFileUpload = (event: Event) => {
   const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-
-  photoName.value = file.name
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    const result = e.target?.result
-    if (typeof result === 'string') {
-      form.photo = result
-    }
-  }
-  reader.readAsDataURL(file)
+  const file = input.files?.[0] || null
+  form.photoFile = file
+  photoName.value = file?.name || null
 }
 
 const handleRegister = async (): Promise<void> => {
-  // Validations de base
   if (!form.nom || !form.prenom || !form.pseudo || !form.email) {
     error.value = 'Merci de compléter tous les champs requis.'
     return
@@ -233,7 +223,8 @@ const handleRegister = async (): Promise<void> => {
       email: form.email,
       age: ageNum,
       password: form.password,
-      photo: form.photo || undefined
+      // on passe le File, pas du base64
+      photoFile: form.photoFile || undefined
     })
 
     if (result.success) {
@@ -250,5 +241,4 @@ const handleRegister = async (): Promise<void> => {
 </script>
 
 <style scoped>
-/* Style blanc + bleu ciel uniquement */
 </style>

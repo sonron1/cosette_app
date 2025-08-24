@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-white to-sky-50 flex items-center justify-center px-6">
+  <div class="min-h-screen bg-gradient-to-b from-white to-sky-50 flex items-center justify-center px-4 sm:px-6">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Connexion</h1>
@@ -7,7 +7,7 @@
       </div>
 
       <div class="rounded-2xl bg-white ring-1 ring-sky-100 shadow-md">
-        <form @submit.prevent="handleLogin" class="p-6 md:p-8 space-y-6" novalidate>
+        <form @submit.prevent="handleLogin" class="p-5 sm:p-6 md:p-8 space-y-6" novalidate>
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
             <input
@@ -58,14 +58,14 @@
             <span v-else>Se connecter</span>
           </button>
 
-          <div class="flex items-center justify-between text-sm">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-0 items-center justify-between text-sm">
             <NuxtLink to="/" class="text-sky-700 hover:text-sky-800 hover:underline">Retour à l’accueil</NuxtLink>
             <NuxtLink to="/auth/forgot" class="text-sky-700 hover:text-sky-800 hover:underline">Mot de passe oublié ?</NuxtLink>
           </div>
         </form>
       </div>
 
-      <div class="mt-6 text-center">
+      <div class="mt-6 text-center px-2">
         <p class="text-gray-600">
           Pas encore de compte ?
           <NuxtLink to="/auth/register" class="text-sky-700 font-semibold hover:text-sky-800 hover:underline">
@@ -123,5 +123,4 @@ const handleLogin = async (): Promise<void> => {
 </script>
 
 <style scoped>
-/* Aucun style sombre, uniquement blanc et bleu ciel avec décorations très légères */
 </style>

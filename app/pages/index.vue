@@ -2,24 +2,24 @@
   <section class="relative overflow-hidden" style="font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;">
     <!-- Hero -->
     <div class="absolute inset-0 -z-10 bg-gradient-to-b from-white to-sky-50"></div>
-    <UContainer class="pt-20 pb-20">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
+    <UContainer class="pt-14 md:pt-20 pb-14 md:pb-20">
+      <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div>
           <p class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold ring-1 ring-sky-200 mb-4">
             <UIcon name="i-heroicons-sparkles-20-solid" />
             Nouveau: expériences plus rapides
           </p>
-          <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-sky-900 leading-tight">
+          <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-sky-900 leading-tight">
             Communication simple, <span class="text-sky-600">sécurisée</span> et efficace
           </h1>
           <p class="mt-4 text-sky-700 max-w-xl">
             Centralisez vos conversations, partagez des fichiers et collaborez avec fluidité grâce à une interface moderne.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
-            <UButton color="sky" size="lg" to="/signup">Essayer gratuitement</UButton>
+            <UButton color="sky" size="lg" to="/auth/register">Essayer gratuitement</UButton>
             <UButton color="white" variant="ghost" size="lg" to="#features">Voir les fonctionnalités</UButton>
           </div>
-          <div class="mt-8 flex items-center gap-6 text-sm text-sky-700">
+          <div class="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-sky-700">
             <div class="flex items-center gap-2">
               <UIcon name="i-heroicons-check-circle-20-solid" class="text-sky-600" />
               Sans carte requise
@@ -32,11 +32,11 @@
         </div>
 
         <div class="relative">
-          <div class="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-sky-200/40 blur-2xl"></div>
+          <div class="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-sky-200/40 blur-2xl hidden sm:block"></div>
           <img
               src="https://images.unsplash.com/photo-1525182008055-f88b95ff7980?auto=format&fit=crop&w=1400&q=80"
               alt="Aperçu de l'application"
-              class="relative z-10 rounded-lg ring-1 ring-sky-200/60"
+              class="relative z-10 rounded-lg ring-1 ring-sky-200/60 w-full h-auto"
               referrerpolicy="no-referrer"
           />
         </div>
@@ -45,14 +45,14 @@
   </section>
 
   <!-- Features -->
-  <section id="features" class="py-20 bg-white" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
+  <section id="features" class="py-16 md:py-20 bg-white" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
     <UContainer>
-      <h2 class="text-3xl font-bold text-center text-sky-900">Tout ce qu’il faut pour collaborer</h2>
+      <h2 class="text-2xl md:text-3xl font-bold text-center text-sky-900">Tout ce qu’il faut pour collaborer</h2>
       <p class="mt-3 text-center text-sky-700 max-w-2xl mx-auto">
         Des outils simples et efficaces pour votre quotidien.
       </p>
 
-      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-8 md:mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <UCard class="transition ring-1 ring-sky-100 hover:ring-sky-200">
           <template #header>
             <div class="flex items-center gap-3">
@@ -129,19 +129,19 @@
   </section>
 
   <!-- Metrics -->
-  <section class="py-20 bg-sky-50/40" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
+  <section class="py-16 md:py-20 bg-sky-50/40" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
     <UContainer>
-      <div class="grid md:grid-cols-3 gap-6">
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
         <div class="p-6 rounded-xl bg-white ring-1 ring-sky-100 text-center">
-          <p class="text-4xl font-extrabold text-sky-600">99.9%</p>
+          <p class="text-3xl md:text-4xl font-extrabold text-sky-600">99.9%</p>
           <p class="text-sky-700 mt-1">Disponibilité</p>
         </div>
         <div class="p-6 rounded-xl bg-white ring-1 ring-sky-100 text-center">
-          <p class="text-4xl font-extrabold text-sky-600">2x</p>
+          <p class="text-3xl md:text-4xl font-extrabold text-sky-600">2x</p>
           <p class="text-sky-700 mt-1">Plus rapide</p>
         </div>
-        <div class="p-6 rounded-xl bg-white ring-1 ring-sky-100 text-center">
-          <p class="text-4xl font-extrabold text-sky-600">+10k</p>
+        <div class="p-6 rounded-xl bg-white ring-1 ring-sky-100 text-center sm:col-span-2 md:col-span-1">
+          <p class="text-3xl md:text-4xl font-extrabold text-sky-600">+10k</p>
           <p class="text-sky-700 mt-1">Utilisateurs</p>
         </div>
       </div>
@@ -149,12 +149,12 @@
   </section>
 
   <!-- Pricing -->
-  <section id="pricing" class="py-20 bg-white" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
+  <section id="pricing" class="py-16 md:py-20 bg-white" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
     <UContainer>
-      <h2 class="text-3xl font-bold text-center text-sky-900">Tarification simple</h2>
+      <h2 class="text-2xl md:text-3xl font-bold text-center text-sky-900">Tarification simple</h2>
       <p class="mt-3 text-center text-sky-700 max-w-2xl mx-auto">Commencez gratuitement, évoluez selon vos besoins.</p>
 
-      <div class="mt-10 grid gap-6 md:grid-cols-3">
+      <div class="mt-8 md:mt-10 grid gap-6 md:grid-cols-3">
         <UCard class="relative overflow-hidden ring-1 ring-sky-100">
           <template #header>
             <h3 class="font-semibold text-sky-900">Gratuit</h3>
@@ -166,7 +166,7 @@
             <li>Support communautaire</li>
           </ul>
           <template #footer>
-            <UButton color="sky" block to="/signup">Choisir</UButton>
+            <UButton color="sky" block to="/auth/register">Choisir</UButton>
           </template>
         </UCard>
 
@@ -186,7 +186,7 @@
             <li>Support prioritaire</li>
           </ul>
           <template #footer>
-            <UButton color="sky" block to="/signup">Choisir</UButton>
+            <UButton color="sky" block to="/auth/register">Choisir</UButton>
           </template>
         </UCard>
 
@@ -209,21 +209,21 @@
   </section>
 
   <!-- FAQ -->
-  <section id="faq" class="py-20 bg-sky-50/40" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
+  <section id="faq" class="py-16 md:py-20 bg-sky-50/40" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
     <UContainer>
-      <h2 class="text-3xl font-bold text-center text-sky-900">Questions fréquentes</h2>
+      <h2 class="text-2xl md:text-3xl font-bold text-center text-sky-900">Questions fréquentes</h2>
       <UAccordion class="mt-8 max-w-3xl mx-auto" :items="faqItems" color="sky" variant="soft" />
     </UContainer>
   </section>
 
   <!-- CTA -->
-  <section class="py-16 bg-white" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
+  <section class="py-14 md:py-16 bg-white" style="font-family: 'DM Sans', ui-sans-serif, system-ui;">
     <UContainer class="text-center">
-      <div class="rounded-2xl bg-gradient-to-r from-white to-sky-50 ring-1 ring-sky-100 p-10">
+      <div class="rounded-2xl bg-gradient-to-r from-white to-sky-50 ring-1 ring-sky-100 p-8 md:p-10">
         <h3 class="text-2xl font-bold text-sky-900">Prêt à démarrer ?</h3>
         <p class="text-sky-700 mt-2">Créez votre compte et commencez à collaborer dès aujourd’hui.</p>
         <div class="mt-6">
-          <UButton color="sky" size="lg" to="/signup">Créer un compte</UButton>
+          <UButton color="sky" size="lg" to="/auth/register">Créer un compte</UButton>
         </div>
       </div>
     </UContainer>
@@ -239,7 +239,6 @@ const faqItems = [
 </script>
 
 <style scoped>
-/* Animations simples */
 @keyframes float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
 .animate-float { animation: float 6s ease-in-out infinite; }
 </style>
