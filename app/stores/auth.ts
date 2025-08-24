@@ -30,17 +30,17 @@ type RegisterPayload = {
     prenom: string
     pseudo: string
     age: number
-    // Nouvelle prise en charge: fichier image à uploader dans Storage
     photoFile?: File
-    // Rétro-compatibilité si une base64/URL est fournie (sera utilisée seulement si pas de fichier)
     photo?: string
 }
+
+const BUCKET_AVATARS = 'avatars'
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null)
     const friends = ref<User[]>([])
     const friendRequests = ref<FriendRequest[]>([])
-    const supabase = useSupabaseClient<any>() // relaxe le typage pour éviter "never"
+    const supabase = useSupabaseClient<any>() // relaxer le typage
 
     const fetchUserProfile = async (userId: string) => {
         try {
@@ -64,24 +64,36 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    // Helper: upload d’un avatar dans le bucket "avatars" et retour de l’URL publique
     const uploadAvatar = async (ownerId: string, file: File): Promise<string> => {
+        // Chemin interne AU SEIN du bucket (ne pas préfixer par le nom du bucket)
         const ext = file.name.includes('.') ? file.name.split('.').pop() : 'jpg'
-        const filePath = `avatars/${ownerId}/${Date.now()}.${ext}`
+        const filePath = `${ownerId}/${Date.now()}.${ext}`
+
         const { error: uploadError } = await supabase.storage
-            .from('avatars')
+            .from(BUCKET_AVATARS)
             .upload(filePath, file, {
                 cacheControl: '3600',
                 upsert: false
             })
-        if (uploadError) throw uploadError
-        const { data: pub } = supabase.storage.from('avatars').getPublicUrl(filePath)
+
+        if (uploadError) {
+            // Aide au debug plus claire
+            const msg = uploadError.message || ''
+            if (msg.toLowerCase().includes('bucket not found')) {
+                throw new Error(
+                    `Bucket "${BUCKET_AVATARS}" introuvable. Créez-le dans Supabase Storage et réessayez.`
+                )
+            }
+            throw uploadError
+        }
+
+        const { data: pub } = supabase.storage.from(BUCKET_AVATARS).getPublicUrl(filePath)
         return pub.publicUrl
     }
 
     const register = async (userData: RegisterPayload) => {
         try {
-            // Vérifier l’unicité du pseudo dans la table "users"
+            // Unicité du pseudo
             const { data: existingUser, error: existingErr } = await supabase
                 .from('users')
                 .select('pseudo')
@@ -90,7 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
             if (existingErr) throw existingErr
             if (existingUser) return { success: false, error: 'Ce pseudo est déjà utilisé' }
 
-            // Création du compte auth
+            // Création Auth
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: userData.email,
                 password: userData.password
@@ -98,16 +110,21 @@ export const useAuthStore = defineStore('auth', () => {
             if (authError) throw authError
 
             if (authData.user?.id) {
-                // Upload avatar si présent
                 let photoUrl: string | undefined = undefined
+
+                // Tenter l’upload de l’avatar si fourni
                 if (userData.photoFile) {
-                    photoUrl = await uploadAvatar(authData.user.id, userData.photoFile)
+                    try {
+                        photoUrl = await uploadAvatar(authData.user.id, userData.photoFile)
+                    } catch (e: any) {
+                        // On log mais on ne bloque pas l’inscription sur l’avatar
+                        console.warn('Upload avatar échoué:', e?.message || e)
+                    }
                 } else if (userData.photo) {
-                    // fallback: si une base64/URL a été fournie (pas recommandé, mais gardé pour compat)
                     photoUrl = userData.photo
                 }
 
-                // Insertion du profil dans la table "users"
+                // Insérer le profil
                 const payload = {
                     id: authData.user.id,
                     email: userData.email,
@@ -120,7 +137,6 @@ export const useAuthStore = defineStore('auth', () => {
                 const { error: profileError } = await supabase.from('users').insert(payload)
                 if (profileError) throw profileError
 
-                // Charger le profil dans le store
                 await fetchUserProfile(authData.user.id)
             }
 
@@ -255,7 +271,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    // Optionnel: mettre à jour la photo de profil après l’inscription
+    // Mise à jour de la photo après coup (si upload décalé après la connexion)
     const updateProfilePhoto = async (file: File) => {
         try {
             if (!user.value?.id) throw new Error('Utilisateur non authentifié')
@@ -265,7 +281,6 @@ export const useAuthStore = defineStore('auth', () => {
                 .update({ photo: photoUrl })
                 .eq('id', user.value.id)
             if (error) throw error
-            // mettre à jour localement
             user.value = { ...(user.value as User), photo: photoUrl }
             return { success: true, photoUrl }
         } catch (e: any) {
