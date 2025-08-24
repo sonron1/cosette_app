@@ -1,6 +1,5 @@
-<!-- layouts/default.vue -->
 <template>
-  <div class="min-h-screen bg-white text-gray-800">
+  <div class="min-h-screen bg-gradient-to-b from-white to-sky-50 text-sky-900">
     <AppHeader />
     <main>
       <slot />

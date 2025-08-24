@@ -1,48 +1,5 @@
 <template>
   <div class="min-h-screen bg-gradient-to-b from-white to-sky-50">
-    <!-- Header -->
-    <header class="bg-white/90 backdrop-blur border-b border-sky-100">
-      <div class="container mx-auto px-6 py-4">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold text-sky-900">Cosette</h1>
-            <span class="text-sky-300">|</span>
-            <span class="text-sky-800/80">Tableau de bord</span>
-          </div>
-
-          <div class="flex items-center space-x-3">
-            <NuxtLink
-                to="/chat"
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors"
-            >
-              💬 Ouvrir le chat
-            </NuxtLink>
-
-            <div class="flex items-center space-x-3">
-              <img
-                  :src="authStore.user?.photo || '/placeholder-avatar.png'"
-                  :alt="authStore.user?.prenom"
-                  class="w-8 h-8 rounded-full object-cover ring-2 ring-sky-100"
-              />
-              <span class="text-sky-900 font-medium">
-                {{ authStore.user?.prenom }} {{ authStore.user?.nom }}
-              </span>
-            </div>
-
-            <button
-                @click="authStore.logout"
-                class="text-sky-700 hover:text-red-600 transition-colors"
-                title="Se déconnecter"
-            >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 012 2v2h-2V4H5v16h9v-2h2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V4a2 2 0 012-2h9z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-
     <div class="container mx-auto px-6 py-8">
       <div class="grid lg:grid-cols-4 gap-8">
         <!-- Sidebar -->
@@ -90,7 +47,11 @@
               </button>
             </form>
 
-            <div v-if="friendRequestMessage" :class="friendRequestSuccess ? 'text-green-600' : 'text-red-600'" class="mt-2 text-sm">
+            <div
+                v-if="friendRequestMessage"
+                :class="friendRequestSuccess ? 'text-green-600' : 'text-red-600'"
+                class="mt-2 text-sm"
+            >
               {{ friendRequestMessage }}
             </div>
           </div>
@@ -111,7 +72,9 @@
                       class="w-10 h-10 rounded-full object-cover ring-1 ring-sky-100"
                   />
                   <div>
-                    <p class="font-medium text-sm text-sky-900">{{ request.sender.prenom }} {{ request.sender.nom }}</p>
+                    <p class="font-medium text-sm text-sky-900">
+                      {{ request.sender.prenom }} {{ request.sender.nom }}
+                    </p>
                     <p class="text-sky-600 text-xs">@{{ request.sender.pseudo }}</p>
                   </div>
                 </div>
@@ -139,8 +102,12 @@
           <!-- CTA -->
           <div class="rounded-2xl bg-white ring-1 ring-sky-100 shadow-sm p-6 flex items-center justify-between">
             <div>
-              <h2 class="text-xl font-semibold text-sky-900">Bienvenue, {{ authStore.user?.prenom }} !</h2>
-              <p class="text-sky-700/80">Retrouvez vos amis et commencez à discuter en temps réel.</p>
+              <h2 class="text-xl font-semibold text-sky-900">
+                Bienvenue, {{ authStore.user?.prenom }} !
+              </h2>
+              <p class="text-sky-700/80">
+                Retrouvez vos amis et commencez à discuter en temps réel.
+              </p>
             </div>
             <NuxtLink
                 to="/chat"
@@ -228,13 +195,17 @@
                       class="w-10 h-10 rounded-full object-cover ring-1 ring-sky-100"
                   />
                   <div>
-                    <h3 class="font-semibold text-sky-900">{{ selectedFriend.prenom }} {{ selectedFriend.nom }}</h3>
+                    <h3 class="font-semibold text-sky-900">
+                      {{ selectedFriend.prenom }} {{ selectedFriend.nom }}
+                    </h3>
                     <p class="text-sky-700/80 text-sm">@{{ selectedFriend.pseudo }}</p>
                   </div>
                 </div>
                 <button @click="closeChat" class="text-sky-700 hover:text-sky-900">
                   <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    <path
+                        d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                    />
                   </svg>
                 </button>
               </div>
@@ -245,9 +216,13 @@
                     <div :class="message.sender_id === authStore.user?.id ? 'message-bubble message-sent' : 'message-bubble message-received'">
                       <p class="text-sm">{{ message.content }}</p>
                       <div v-if="message.file_url" class="mt-2">
-                        <a :href="message.file_url" target="_blank" class="inline-flex items-center space-x-2 text-xs underline">
+                        <a
+                            :href="message.file_url"
+                            target="_blank"
+                            class="inline-flex items-center space-x-2 text-xs underline"
+                        >
                           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
                           </svg>
                           <span>{{ message.file_name }}</span>
                         </a>
@@ -298,7 +273,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '~/stores/auth'
+import { useChatStore } from '~/stores/chat'
+
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 
@@ -306,20 +285,20 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const friendPseudo = ref('')
+const friendPseudo = ref<string>('')
 const friendRequestLoading = ref(false)
 const friendRequestMessage = ref('')
 const friendRequestSuccess = ref(false)
 
 const showChat = ref(false)
-const selectedFriend = ref(null)
+const selectedFriend = ref<any>(null)
 const newMessage = ref('')
-const selectedFile = ref(null)
+const selectedFile = ref<File | null>(null)
 const totalMessages = ref(0)
 
 const pendingRequests = computed(() => {
-  return authStore.friendRequests.filter(request =>
-      request.receiver_id === authStore.user?.id && request.status === 'pending'
+  return authStore.friendRequests.filter(
+      (request: any) => request.receiver_id === authStore.user?.id && request.status === 'pending'
   )
 })
 
@@ -345,7 +324,7 @@ const sendFriendRequest = async () => {
   }, 3000)
 }
 
-const openChat = async (friend) => {
+const openChat = async (friend: any) => {
   selectedFriend.value = friend
   showChat.value = true
   await chatStore.fetchMessages(friend.id)
@@ -359,18 +338,20 @@ const closeChat = () => {
 
 const sendMessage = async () => {
   if (!newMessage.value.trim() && !selectedFile.value) return
-  await chatStore.sendMessage(selectedFriend.value.id, newMessage.value, selectedFile.value)
+  await chatStore.sendMessage(selectedFriend.value.id, newMessage.value, selectedFile.value || undefined)
   newMessage.value = ''
   selectedFile.value = null
 }
 
-const handleFileSelect = (event) => {
-  selectedFile.value = event.target.files[0]
+const handleFileSelect = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  selectedFile.value = input.files?.[0] || null
 }
 
 onMounted(async () => {
   await authStore.fetchFriendRequests()
   await authStore.fetchFriends()
+  // Optionnel: calculer/charger totalMessages
 })
 </script>
 

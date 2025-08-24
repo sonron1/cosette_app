@@ -2,7 +2,8 @@ import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: [
+    srcDir: 'app',
+    modules: [
     '@nuxt/ui',
     '@pinia/nuxt',
     '@nuxtjs/google-fonts',
@@ -23,7 +24,8 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/auth/login',
       callback: '/dashboard',
-      exclude: ['/', '/auth/login', '/auth/register', '/auth/forgot']
+        exclude: ['/', '/auth/register']
+        //exclude: ['/', '/auth/login', '/auth/register', '/auth/forgot']
     },
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY
