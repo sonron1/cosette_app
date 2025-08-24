@@ -1,15 +1,21 @@
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware((to) => {
     const user = useSupabaseUser()
 
-    // Autoriser l'accès aux pages publiques
-    const publicPages = ['/', '/auth/login', '/auth/register']
+    // Pages publiques accessibles sans connexion
+    const publicPaths = new Set<string>([
+        '/',
+        '/auth/login',
+        '/auth/register',
+        '/auth/forgot'
+    ])
 
-    if (!user.value && !publicPages.includes(to.path)) {
+    // Si pas connecté et route privée => redirection vers login
+    if (!user.value && !publicPaths.has(to.path)) {
         return navigateTo('/auth/login')
     }
 
-    // Rediriger les utilisateurs connectés depuis les pages d'auth
-    if (user.value && ['/auth/login', '/auth/register'].includes(to.path)) {
+    // Si connecté et route publique d'auth => redirection vers dashboard
+    if (user.value && publicPaths.has(to.path)) {
         return navigateTo('/dashboard')
     }
 })

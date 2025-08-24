@@ -13,6 +13,15 @@
     },
     {
       "path": "./.nuxt/tsconfig.node.json"
+    },
+  ],
+  "types":[
+  {
+    "compilerOptions": {
+      "strict": true,
+      "types": ["nuxt"]
     }
-  ]
+  }
+]
+
 }
